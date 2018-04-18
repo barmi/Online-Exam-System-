@@ -1,18 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>NETCAMP || DASHBOARD </title>
-<link  rel="stylesheet" href="css/bootstrap.min.css"/>
- <link  rel="stylesheet" href="css/bootstrap-theme.min.css"/>    
- <link rel="stylesheet" href="css/main.css">
- <link  rel="stylesheet" href="css/font.css">
- <script src="js/jquery.js" type="text/javascript"></script>
-
-  <script src="js/bootstrap.min.js"  type="text/javascript"></script>
- 	<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+<?php
+ include_once 'head.html';
+?>
 
 <script>
 $(function () {
@@ -32,25 +20,24 @@ $(function () {
 </head>
 
 <body  style="background:#eee;">
-<div class="header">
-<div class="row">
-<div class="col-lg-6">
-<span class="logo">Test Your Skill</span></div>
+
 <?php
- include_once 'dbConnection.php';
-session_start();
-$email=$_SESSION['email'];
-  if(!(isset($_SESSION['email']))){
-header("location:index.php");
+	include_once 'title.html';
+	include_once 'dbConnection.php';
+	session_start();
+	$email=$_SESSION['email'];
+	if(!(isset($_SESSION['email'])))
+	{
+		header("location:index.php");
+	}
+	else
+	{
+		$name = $_SESSION['name'];
 
-}
-else
-{
-$name = $_SESSION['name'];
-
-include_once 'dbConnection.php';
-echo '<span class="pull-right top title1" ><span class="log1"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;&nbsp;&nbsp;Hello,</span> <a href="account.php" class="log log1">'.$name.'</a>&nbsp;|&nbsp;<a href="logout.php?q=account.php" class="log"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>&nbsp;Signout</button></a></span>';
-}?>
+		include_once 'dbConnection.php';
+		echo '<span class="pull-right top title1" ><span class="log1"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;&nbsp;&nbsp;Hello,</span> <a href="account.php" class="log log1">'.$name.'</a>&nbsp;|&nbsp;<a href="logout.php?q=account.php" class="log"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>&nbsp;Signout</button></a></span>';
+	}
+?>
 
 </div></div>
 <!-- admin start-->
@@ -96,7 +83,7 @@ echo '<span class="pull-right top title1" ><span class="log1"><span class="glyph
 
 $result = mysqli_query($con,"SELECT * FROM quiz ORDER BY date DESC") or die('Error');
 echo  '<div class="panel"><table class="table table-striped title1">
-<tr><td><b>S.N.</b></td><td><b>Topic</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
+<tr><td><b>S.N.</b></td><td><b>시험종류</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
 $c=1;
 while($row = mysqli_fetch_array($result)) {
 	$title = $row['title'];
@@ -390,7 +377,7 @@ echo '<div class="form-group">
 
 $result = mysqli_query($con,"SELECT * FROM quiz ORDER BY date DESC") or die('Error');
 echo  '<div class="panel"><table class="table table-striped title1">
-<tr><td><b>S.N.</b></td><td><b>Topic</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
+<tr><td><b>S.N.</b></td><td><b>시험종류</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
 $c=1;
 while($row = mysqli_fetch_array($result)) {
 	$title = $row['title'];

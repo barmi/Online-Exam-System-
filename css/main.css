@@ -42,12 +42,12 @@ font-family:'typo';
 .header
 {
 background:#202020;
-height:70px;
+height:80px;
 }
 .logo
 {
 font-family:'typo';
-font-size:35px;
+font-size:30px;
 color:#ffbb33;
 margin:15px;
 }
