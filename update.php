@@ -136,7 +136,7 @@ if(@$_GET['q']== 'quiz' && @$_GET['step']== 2)
 		//die($query);
 		$q = mysqli_query($con, $query)or die('Error:'.__LINE__);
 		
-		writeLog("update", "문제 저장-$sn-$qid");
+		writeLog("update", "문제 저장-$sn-$qid-$atext");
 		header("location:account.php?q=1");
 	}
 	else
