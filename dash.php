@@ -193,8 +193,59 @@ $(function () {
 		}
 		echo '</table></div>';
 	}
+	// answer list by question
+	else if (@$_GET['q'] == 10 && !(@$_GET['step']))
+	{
+		$eid = @$_GET['eid'];
+		$result = mysqli_query($con,"SELECT a.qid as qid, a.qtitle as qtitle, a.sn as sn, count(b.email) as cnt FROM `questions` a LEFT OUTER JOIN `useranswer` b ON b.qid = a.qid WHERE a.eid='$eid' GROUP BY a.qid ORDER BY sn") or die('Error');
+		echo  '<div class="panel"><p><b>시 험 명 : '.$_SESSION['config']['exam.title'].'<br />응시시간 : '.$_SESSION['config']['exam.begin'].' ~ '.$_SESSION['config']['exam.end'].'</b></p><table class="table table-striped title1"> <tr><td><b>번호</b></td><td><b>문제명</b></td><td><b>답안수</b></td><td></td></tr>';
+		while($row = mysqli_fetch_array($result)) 
+		{
+			$qid = $row['qid'];
+			$qtitle = $row['qtitle'];
+			$sn = $row['sn'];
+			$cnt = $row['cnt'];
+			echo '<tr><td>'.$sn.'</td><td>'.$qtitle.'</td><td>'.$cnt.'</td><td><b>';
+			if ($cnt > 0)
+				echo '<a href="dash.php?q=10&step=2&eid='.$eid.'&qid='.$qid.'&n='.$sn.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>View</b></span></a>';
+			else
+				echo '&nbsp;';
+			echo '</b></td></tr>';
+		}
+		echo '</table></div>';
+	}
+	// answer list by question
+	else if (@$_GET['q'] == 10 && @$_GET['step'] == 2)
+	{
+		$eid = @$_GET['eid'];
+		$qid = @$_GET['qid'];
+		$n = @$_GET['n'];
+		$result = mysqli_query($con,"SELECT * FROM `useranswer` WHERE qid='$qid' ORDER BY email") or die('Error');
+		echo  '<div class="panel"><p><b>시 험 명 : '.$_SESSION['config']['exam.title'].'<br />응시시간 : '.$_SESSION['config']['exam.begin'].' ~ '.$_SESSION['config']['exam.end'].'</b></p><table class="table table-striped title1"> <tr><td><b>번호</b></td><td><b>문제명</b></td><td><b>답안수</b></td><td></td></tr>';
+		$c=1;
+		while($row = mysqli_fetch_array($result)) 
+		{
+			$email = $row['email'];
+			echo '<tr><td>'.$c++.'</td><td>'.$email.'</td><td><b><a href="dash.php?q=10&step=3&uid='.$email.'&qid='.$qid.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>답안보기</b></span></a></b></td></tr>';
+		}
+		echo '</table></div>';
+	}
+	else if (@$_GET['q'] == 10 && @$_GET['step'] == 3)
+	{
+		$email = @$_GET['uid'];
+		$qid = @$_GET['qid'];
+		$n = @$_GET['n'];
+		$result = mysqli_query($con,"SELECT * FROM `useranswer` WHERE qid='$qid' AND email='$email'") or die('Error');
+		echo  '<div class="panel"><p><b>시 험 명 : '.$_SESSION['config']['exam.title'].'<br />응시시간 : '.$_SESSION['config']['exam.begin'].' ~ '.$_SESSION['config']['exam.end'].'</b></p>';
+		if ($row = mysqli_fetch_array($result)) 
+		{
+			$atext = htmlspecialchars($row['atext']);
+			echo '<pre class="brush:cpp; toolbar:false;">'.$atext.'</pre>';
+		}
+		echo '</div>';
+	}
 	// admin test
-	else if(@$_GET['q'] == 10) 
+	else if(@$_GET['q'] == 11) 
 	{
 ?>
 <div class="panel">
