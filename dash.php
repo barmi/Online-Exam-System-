@@ -1,6 +1,23 @@
 <?php
- include_once 'head.html';
+	include_once 'dbConnection.php';
+	session_start();
+
+	if ($_SESSION['key'] != 'sunny7785068889')
+	{
+		header("location:account.php?q=1&w=Warning : Access denied");
+		exit();
+	}
+	include_once 'head.html';
 ?>
+
+
+<link rel="stylesheet" type="text/css" href="/highlight/styles/shCoreDefault.css" />
+<link rel="stylesheet" type="text/css" href="/highlight/styles/shThemeDefault.css" />
+
+<script type="text/javascript" src="/highlight/scripts/shCore.js"></script>
+<script type="text/javascript" src="/highlight/scripts/shAutoloader.js"></script>
+<script type="text/javascript" src="/highlight/scripts.js"></script>
+<!-- // SyntaxHighlighter -->
 
 <script>
 $(function () {
@@ -23,8 +40,6 @@ $(function () {
 
 <?php
 	include_once 'title.html';
-	include_once 'dbConnection.php';
-	session_start();
 	$email=$_SESSION['email'];
 	if(!(isset($_SESSION['email'])))
 	{
@@ -79,114 +94,125 @@ $(function () {
 <div class="col-md-12">
 <!--home start-->
 
-<?php if(@$_GET['q']==0) {
+<?php 
+	// home
+	if(@$_GET['q']==0) 
+	{
+		$result = mysqli_query($con,"SELECT * FROM quiz ORDER BY date DESC") or die('Error');
+		echo  '<div class="panel"><table class="table table-striped title1">
+		<tr><td><b>S.N.</b></td><td><b>시험종류</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
+		$c=1;
+		while($row = mysqli_fetch_array($result)) 
+		{
+			$title = $row['title'];
+			$total = $row['total'];
+			$sahi = $row['sahi'];
+			$time = $row['time'];
+			$eid = $row['eid'];
+			
+			$q12=mysqli_query($con,"SELECT score FROM history WHERE eid='$eid' AND email='$email'" )or die('Error98');
+			$rowcount=mysqli_num_rows($q12);	
+			if($rowcount == 0){
+				echo '<tr><td>'.$c++.'</td><td>'.$title.'</td><td>'.$total.'</td><td>'.$sahi*$total.'</td><td>'.$time.'&nbsp;min</td>
+				<td><b><a href="dash.php?q=10&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Admin</b></span></a></b></td></tr>';
+			}
+			else
+			{
+				echo '<tr style="color:#99cc32"><td>'.$c++.'</td><td>'.$title.'&nbsp;<span title="This quiz is already solve by you" class="glyphicon glyphicon-ok" aria-hidden="true"></span></td><td>'.$total.'</td><td>'.$sahi*$total.'</td><td>'.$time.'&nbsp;min</td>
+				<td><b><a href="update.php?q=quizre&step=25&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:red"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Restart</b></span></a></b></td></tr>';
+			}
+		}
+		$c=0;
+		echo '</table></div>';
+	}
+	// user
+	else if(@$_GET['q']==1) 
+	{
+		$result = mysqli_query($con,"SELECT * FROM user") or die('Error');
+		echo  '<div class="panel"><table class="table table-striped title1"> <tr><td><b>S.N.</b></td><td><b>Name</b></td><td><b>Gender</b></td><td><b>College</b></td><td><b>Email</b></td><td><b>Mobile</b></td><td></td></tr>';
+		$c=1;
+		while($row = mysqli_fetch_array($result)) {
+			$name = $row['name'];
+			$mob = $row['mob'];
+			$gender = $row['gender'];
+			$email = $row['email'];
+			$college = $row['college'];
 
-$result = mysqli_query($con,"SELECT * FROM quiz ORDER BY date DESC") or die('Error');
-echo  '<div class="panel"><table class="table table-striped title1">
-<tr><td><b>S.N.</b></td><td><b>시험종류</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
-$c=1;
-while($row = mysqli_fetch_array($result)) {
-	$title = $row['title'];
-	$total = $row['total'];
-	$sahi = $row['sahi'];
-    $time = $row['time'];
-	$eid = $row['eid'];
-$q12=mysqli_query($con,"SELECT score FROM history WHERE eid='$eid' AND email='$email'" )or die('Error98');
-$rowcount=mysqli_num_rows($q12);	
-if($rowcount == 0){
-	echo '<tr><td>'.$c++.'</td><td>'.$title.'</td><td>'.$total.'</td><td>'.$sahi*$total.'</td><td>'.$time.'&nbsp;min</td>
-	<td><b><a href="account.php?q=quiz&step=2&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Start</b></span></a></b></td></tr>';
-}
-else
-{
-echo '<tr style="color:#99cc32"><td>'.$c++.'</td><td>'.$title.'&nbsp;<span title="This quiz is already solve by you" class="glyphicon glyphicon-ok" aria-hidden="true"></span></td><td>'.$total.'</td><td>'.$sahi*$total.'</td><td>'.$time.'&nbsp;min</td>
-	<td><b><a href="update.php?q=quizre&step=25&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:red"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Restart</b></span></a></b></td></tr>';
-}
-}
-$c=0;
-echo '</table></div>';
+			echo '<tr><td>'.$c++.'</td><td>'.$name.'</td><td>'.$gender.'</td><td>'.$college.'</td><td>'.$email.'</td><td>'.$mob.'</td>
+			<td><a title="Delete User" href="update.php?demail='.$email.'"><b><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></b></a></td></tr>';
+		}
+		$c=0;
+		echo '</table></div>';
+	}
+	// ranking
+	else if(@$_GET['q']== 2) 
+	{
+		$q=mysqli_query($con,"SELECT * FROM rank  ORDER BY score DESC " )or die('Error223');
+		echo  '<div class="panel title">
+		<table class="table table-striped title1" >
+		<tr style="color:red"><td><b>Rank</b></td><td><b>Name</b></td><td><b>Gender</b></td><td><b>College</b></td><td><b>Score</b></td></tr>';
+		$c=0;
+		while($row=mysqli_fetch_array($q) )
+		{
+			$e=$row['email'];
+			$s=$row['score'];
+			$q12=mysqli_query($con,"SELECT * FROM user WHERE email='$e' " )or die('Error231');
+			while($row=mysqli_fetch_array($q12) )
+			{
+				$name=$row['name'];
+				$gender=$row['gender'];
+				$college=$row['college'];
+			}
+			$c++;
+			echo '<tr><td style="color:#99cc32"><b>'.$c.'</b></td><td>'.$name.'</td><td>'.$gender.'</td><td>'.$college.'</td><td>'.$s.'</td><td>';
+		}
+		echo '</table></div>';
+	}
+	// feedback
+	else if(@$_GET['q'] == 3) 
+	{
+		$result = mysqli_query($con,"SELECT * FROM `feedback` ORDER BY `feedback`.`date` DESC") or die('Error');
+		echo  '<div class="panel"><table class="table table-striped title1">
+		<tr><td><b>S.N.</b></td><td><b>Subject</b></td><td><b>Email</b></td><td><b>Date</b></td><td><b>Time</b></td><td><b>By</b></td><td></td><td></td></tr>';
+		$c=1;
+		while($row = mysqli_fetch_array($result)) 
+		{
+			$date = $row['date'];
+			$date= date("d-m-Y",strtotime($date));
+			$time = $row['time'];
+			$subject = $row['subject'];
+			$name = $row['name'];
+			$email = $row['email'];
+			$id = $row['id'];
+			 echo '<tr><td>'.$c++.'</td>';
+			echo '<td><a title="Click to open feedback" href="dash.php?q=3&fid='.$id.'">'.$subject.'</a></td><td>'.$email.'</td><td>'.$date.'</td><td>'.$time.'</td><td>'.$name.'</td>
+			<td><a title="Open Feedback" href="dash.php?q=3&fid='.$id.'"><b><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></b></a></td>';
+			echo '<td><a title="Delete Feedback" href="update.php?fdid='.$id.'"><b><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></b></a></td>
 
-}
-
-//ranking start
-if(@$_GET['q']== 2) 
-{
-$q=mysqli_query($con,"SELECT * FROM rank  ORDER BY score DESC " )or die('Error223');
-echo  '<div class="panel title">
-<table class="table table-striped title1" >
-<tr style="color:red"><td><b>Rank</b></td><td><b>Name</b></td><td><b>Gender</b></td><td><b>College</b></td><td><b>Score</b></td></tr>';
-$c=0;
-while($row=mysqli_fetch_array($q) )
-{
-$e=$row['email'];
-$s=$row['score'];
-$q12=mysqli_query($con,"SELECT * FROM user WHERE email='$e' " )or die('Error231');
-while($row=mysqli_fetch_array($q12) )
-{
-$name=$row['name'];
-$gender=$row['gender'];
-$college=$row['college'];
-}
-$c++;
-echo '<tr><td style="color:#99cc32"><b>'.$c.'</b></td><td>'.$name.'</td><td>'.$gender.'</td><td>'.$college.'</td><td>'.$s.'</td><td>';
-}
-echo '</table></div>';}
-
+			</tr>';
+		}
+		echo '</table></div>';
+	}
+	// admin test
+	else if(@$_GET['q'] == 10) 
+	{
 ?>
-
-
-<!--home closed-->
-<!--users start-->
-<?php if(@$_GET['q']==1) {
-
-$result = mysqli_query($con,"SELECT * FROM user") or die('Error');
-echo  '<div class="panel"><table class="table table-striped title1">
-<tr><td><b>S.N.</b></td><td><b>Name</b></td><td><b>Gender</b></td><td><b>College</b></td><td><b>Email</b></td><td><b>Mobile</b></td><td></td></tr>';
-$c=1;
-while($row = mysqli_fetch_array($result)) {
-	$name = $row['name'];
-	$mob = $row['mob'];
-	$gender = $row['gender'];
-    $email = $row['email'];
-	$college = $row['college'];
-
-	echo '<tr><td>'.$c++.'</td><td>'.$name.'</td><td>'.$gender.'</td><td>'.$college.'</td><td>'.$email.'</td><td>'.$mob.'</td>
-	<td><a title="Delete User" href="update.php?demail='.$email.'"><b><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></b></a></td></tr>';
+<div class="panel">
+<pre class="brush:cpp; toolbar:false;">char str[] = &quot;Lucky Boy&quot;;
+int i, score = 0;
+for (i = 0; str[i]; i++) {
+  int ch = str[i];
+  if (ch &gt;= &#39;A&#39; &amp;&amp; ch &lt;= &#39;Z&#39;) {
+    score += ch - &#39;A&#39; + 1;
+  }
 }
-$c=0;
-echo '</table></div>';
+printf(&quot;%d\n&quot;, score);</pre>
+</div>
+<?php
+	}
 
-}?>
-<!--user end-->
-
-<!--feedback start-->
-<?php if(@$_GET['q']==3) {
-$result = mysqli_query($con,"SELECT * FROM `feedback` ORDER BY `feedback`.`date` DESC") or die('Error');
-echo  '<div class="panel"><table class="table table-striped title1">
-<tr><td><b>S.N.</b></td><td><b>Subject</b></td><td><b>Email</b></td><td><b>Date</b></td><td><b>Time</b></td><td><b>By</b></td><td></td><td></td></tr>';
-$c=1;
-while($row = mysqli_fetch_array($result)) {
-	$date = $row['date'];
-	$date= date("d-m-Y",strtotime($date));
-	$time = $row['time'];
-	$subject = $row['subject'];
-	$name = $row['name'];
-	$email = $row['email'];
-	$id = $row['id'];
-	 echo '<tr><td>'.$c++.'</td>';
-	echo '<td><a title="Click to open feedback" href="dash.php?q=3&fid='.$id.'">'.$subject.'</a></td><td>'.$email.'</td><td>'.$date.'</td><td>'.$time.'</td><td>'.$name.'</td>
-	<td><a title="Open Feedback" href="dash.php?q=3&fid='.$id.'"><b><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></b></a></td>';
-	echo '<td><a title="Delete Feedback" href="update.php?fdid='.$id.'"><b><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></b></a></td>
-
-	</tr>';
-}
-echo '</table></div>';
-}
-?>
-<!--feedback closed-->
-
-<!--feedback reading portion start-->
-<?php if(@$_GET['fid']) {
+// feedback reading portion start-->
+if(@$_GET['fid']) {
 echo '<br />';
 $id=@$_GET['fid'];
 $result = mysqli_query($con,"SELECT * FROM feedback WHERE id='$id' ") or die('Error');
@@ -201,7 +227,8 @@ while($row = mysqli_fetch_array($result)) {
 echo '<div class="panel"<a title="Back to Archive" href="update.php?q1=2"><b><span class="glyphicon glyphicon-level-up" aria-hidden="true"></span></b></a><h2 style="text-align:center; margin-top:-15px;font-family: "Ubuntu", sans-serif;"><b>'.$subject.'</b></h1>';
  echo '<div class="mCustomScrollbar" data-mcs-theme="dark" style="margin-left:10px;margin-right:10px; max-height:450px; line-height:35px;padding:5px;"><span style="line-height:35px;padding:5px;">-&nbsp;<b>DATE:</b>&nbsp;'.$date.'</span>
 <span style="line-height:35px;padding:5px;">&nbsp;<b>Time:</b>&nbsp;'.$time.'</span><span style="line-height:35px;padding:5px;">&nbsp;<b>By:</b>&nbsp;'.$name.'</span><br />'.$feedback.'</div></div>';}
-}?>
+}
+?>
 <!--Feedback reading portion closed-->
 
 <!--add quiz start-->
