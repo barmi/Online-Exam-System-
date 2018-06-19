@@ -5,7 +5,7 @@ $email=$_SESSION['email'];
 
 include_once 'util.php';
 
-if (isset($_SESSION['key']) && $_SESSION['key']=='sunny7785068889')
+if (isset($_SESSION['key']) && $_SESSION['key']==$admin_key)
 {
 	//delete feedback
 	if(@$_GET['fdid'])

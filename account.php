@@ -106,9 +106,9 @@ function validateForm()
 
 include_once 'util.php';
 
-if(@$_GET['q']==1) 
+if(@$_GET['q']==1 || @$_GET['q'] == "") 
 {
-	if ( is_in_examtime() )
+	if ( is_in_examtime() || $_SESSION['key'] == $admin_key )
 	{
 		// 시험리스트 출력을 문제 리스트 출력으로 변경
 		$eid = $_SESSION['config']['eid'];
@@ -167,7 +167,7 @@ if(@$_GET['q']== 'quiz' && @$_GET['step']== 2)
 	$eid=@$_GET['eid'];
 	$sn=@$_GET['n'];
 	$total=@$_GET['t'];
-	if ( is_in_examtime() )
+	if ( is_in_examtime() || $_SESSION['key'] == $admin_key )
 	{
 		$q=mysqli_query($con,"SELECT * FROM questions WHERE eid='$eid' AND sn='$sn' " );
 		echo '<div class="panel" style="margin:5%">';

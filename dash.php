@@ -2,7 +2,7 @@
 	include_once 'dbConnection.php';
 	session_start();
 
-	if ($_SESSION['key'] != 'sunny7785068889')
+	if ($_SESSION['key'] != $admin_key)
 	{
 		header("location:account.php?q=1&w=Warning : Access denied");
 		exit();
