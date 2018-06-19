@@ -5,21 +5,17 @@ $email=$_SESSION['email'];
 
 include_once 'util.php';
 
-//delete feedback
-if(isset($_SESSION['key']))
+if (isset($_SESSION['key']) && $_SESSION['key']=='sunny7785068889')
 {
-	if(@$_GET['fdid'] && $_SESSION['key']=='sunny7785068889')
+	//delete feedback
+	if(@$_GET['fdid'])
 	{
 		$id=@$_GET['fdid'];
 		$result = mysqli_query($con,"DELETE FROM feedback WHERE id='$id' ") or die('Error:'.__LINE__);
 		header("location:dash.php?q=3");
 	}
-}
-
-//delete user
-if(isset($_SESSION['key']))
-{
-	if(@$_GET['demail'] && $_SESSION['key']=='sunny7785068889') 
+	//delete user
+	else if(@$_GET['demail']) 
 	{
 		$demail=@$_GET['demail'];
 		$r1 = mysqli_query($con,"DELETE FROM rank WHERE email='$demail' ") or die('Error:'.__LINE__);
@@ -27,11 +23,8 @@ if(isset($_SESSION['key']))
 		$result = mysqli_query($con,"DELETE FROM user WHERE email='$demail' ") or die('Error');
 		header("location:dash.php?q=1");
 	}
-}
-//remove quiz
-if(isset($_SESSION['key']))
-{
-	if(@$_GET['q']== 'rmquiz' && $_SESSION['key']=='sunny7785068889')
+	//remove quiz
+	else if(@$_GET['q']== 'rmquiz')
 	{
 		$eid=@$_GET['eid'];
 		$result = mysqli_query($con,"SELECT * FROM questions WHERE eid='$eid' ") or die('Error');
@@ -47,12 +40,8 @@ if(isset($_SESSION['key']))
 
 		header("location:dash.php?q=5");
 	}
-}
-
-//add quiz
-if(isset($_SESSION['key']))
-{
-	if(@$_GET['q']== 'addquiz' && $_SESSION['key']=='sunny7785068889')
+	//add quiz
+	else if(@$_GET['q']== 'addquiz')
 	{
 		$name = $_POST['name'];
 		$name= ucwords(strtolower($name));
@@ -67,12 +56,8 @@ if(isset($_SESSION['key']))
 
 		header("location:dash.php?q=4&step=2&eid=$id&n=$total");
 	}
-}
-
-//add question
-if(isset($_SESSION['key']))
-{
-	if(@$_GET['q']== 'addqns' && $_SESSION['key']=='sunny7785068889')
+	//add question
+	else if(@$_GET['q']== 'addqns')
 	{
 		$n=@$_GET['n'];
 		$eid=@$_GET['eid'];
@@ -119,6 +104,42 @@ if(isset($_SESSION['key']))
 		}
 		header("location:dash.php?q=0");
 	}
+	else if (@$_GET['q'] == 'score')
+	{
+		$item_count = $_POST['item_count'];
+		$eid = $_POST['eid'];
+		$uid = $_POST['uid'];
+		//print_r($_POST);
+		for ($i = 0; $i < $item_count; $i++)
+		{
+			$aresult = mysqli_real_escape_string($con, $_POST["aresult_".$i]);
+			$ascore = $_POST["ascore_".$i];
+			$qid = $_POST["qid_".$i];
+			$query = "UPDATE useranswer SET aresult='$aresult', ascore='$ascore' WHERE qid='$qid' AND email='$uid'";
+			$result = mysqli_query($con, $query) or die('Error:'.__LINE__);
+			//echo $query.'<br />';
+		}
+		header("location:dash.php?q=11&eid=$eid");
+	}
+	else if (@$_GET['q'] == 'score2')
+	{
+		$item_count = $_POST['item_count'];
+		$eid = $_POST['eid'];
+		//$uid = $_POST['uid'];
+		//print_r($_POST);
+		for ($i = 0; $i < $item_count; $i++)
+		{
+			$aresult = mysqli_real_escape_string($con, $_POST["aresult_".$i]);
+			$ascore = $_POST["ascore_".$i];
+			$qid = $_POST["qid_".$i];
+			$uid = $_POST["uid_".$i];
+			$query = "UPDATE useranswer SET aresult='$aresult', ascore='$ascore' WHERE qid='$qid' AND email='$uid'";
+			$result = mysqli_query($con, $query) or die('Error:'.__LINE__);
+			//echo $query.'<br />';
+		}
+		header("location:dash.php?q=10&eid=$eid");
+	}
+
 }
 
 //quiz start
@@ -146,9 +167,8 @@ if(@$_GET['q']== 'quiz' && @$_GET['step']== 2)
 	}
 	
 }
-
 //restart quiz
-if(@$_GET['q']== 'quizre' && @$_GET['step']== 25 ) 
+else if(@$_GET['q']== 'quizre' && @$_GET['step']== 25 ) 
 {
 	$eid=@$_GET['eid'];
 	$n=@$_GET['n'];
@@ -168,8 +188,7 @@ if(@$_GET['q']== 'quizre' && @$_GET['step']== 25 )
 	$q=mysqli_query($con,"UPDATE `rank` SET `score`=$sun ,time=NOW() WHERE email= '$email'")or die('Error174');
 	header("location:account.php?q=quiz&step=2&eid=$eid&n=1&t=$t");
 }
-
-if( @$_GET['q'] == 2 ) 
+else if( @$_GET['q'] == 2 ) 
 {
 	writeLog('update', "비밀번호변경");
 	$password = $_POST['password'];
@@ -178,6 +197,3 @@ if( @$_GET['q'] == 2 )
 	header("location:index.php");
 }
 ?>
-
-
-

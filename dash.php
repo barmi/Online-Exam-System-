@@ -100,7 +100,7 @@ $(function () {
 	{
 		$result = mysqli_query($con,"SELECT * FROM quiz ORDER BY date DESC") or die('Error');
 		echo  '<div class="panel"><table class="table table-striped title1">
-		<tr><td><b>S.N.</b></td><td><b>시험종류</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td></tr>';
+		<tr><td><b>S.N.</b></td><td><b>시험종류</b></td><td><b>Total question</b></td><td><b>Marks</b></td><td><b>Time limit</b></td><td></td><td></td></tr>';
 		$c=1;
 		while($row = mysqli_fetch_array($result)) 
 		{
@@ -114,7 +114,8 @@ $(function () {
 			$rowcount=mysqli_num_rows($q12);	
 			if($rowcount == 0){
 				echo '<tr><td>'.$c++.'</td><td>'.$title.'</td><td>'.$total.'</td><td>'.$sahi*$total.'</td><td>'.$time.'&nbsp;min</td>
-				<td><b><a href="dash.php?q=10&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>Admin</b></span></a></b></td></tr>';
+				<td><b><a href="dash.php?q=10&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>문제별</b></span></a></b></td>'
+				.'<td><b><a href="dash.php?q=11&eid='.$eid.'&n=1&t='.$total.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>학생별</b></span></a></b></td></tr>';
 			}
 			else
 			{
@@ -198,7 +199,7 @@ $(function () {
 	{
 		$eid = @$_GET['eid'];
 		$result = mysqli_query($con,"SELECT a.qid as qid, a.qtitle as qtitle, a.sn as sn, count(b.email) as cnt FROM `questions` a LEFT OUTER JOIN `useranswer` b ON b.qid = a.qid WHERE a.eid='$eid' GROUP BY a.qid ORDER BY sn") or die('Error');
-		echo  '<div class="panel"><p><b>시 험 명 : '.$_SESSION['config']['exam.title'].'<br />응시시간 : '.$_SESSION['config']['exam.begin'].' ~ '.$_SESSION['config']['exam.end'].'</b></p><table class="table table-striped title1"> <tr><td><b>번호</b></td><td><b>문제명</b></td><td><b>답안수</b></td><td></td></tr>';
+		echo  '<div class="panel"><p><b>시 험 명 : '.$_SESSION['config']['exam.title'].'<br />응시시간 : '.$_SESSION['config']['exam.begin'].' ~ '.$_SESSION['config']['exam.end'].'</b></p><table class="table table-striped title1"> <tr><td><b>번호</b></td><td><b>문제명</b></td><td><b>답안수</b></td><td></td><td></td></tr>';
 		while($row = mysqli_fetch_array($result)) 
 		{
 			$qid = $row['qid'];
@@ -207,9 +208,9 @@ $(function () {
 			$cnt = $row['cnt'];
 			echo '<tr><td>'.$sn.'</td><td>'.$qtitle.'</td><td>'.$cnt.'</td><td><b>';
 			if ($cnt > 0)
-				echo '<a href="dash.php?q=10&step=2&eid='.$eid.'&qid='.$qid.'&n='.$sn.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>View</b></span></a>';
+				echo '<a href="dash.php?q=10&step=2&eid='.$eid.'&qid='.$qid.'&n='.$sn.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>View</b></span></a></b></td><td><b><a href="dash.php?q=10&step=4&eid='.$eid.'&qid='.$qid.'&n='.$sn.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>전체보기</b></span></a>';
 			else
-				echo '&nbsp;';
+				echo '&nbsp;</b></td><td><b>&nbsp;';
 			echo '</b></td></tr>';
 		}
 		echo '</table></div>';
@@ -244,8 +245,87 @@ $(function () {
 		}
 		echo '</div>';
 	}
+	else if (@$_GET['q'] == 10 && @$_GET['step'] == 4)
+	{
+		$eid = @$_GET['eid'];
+		$qid = @$_GET['qid'];
+		$n = @$_GET['n'];
+		$result = mysqli_query($con,"SELECT s.email, s.name, u.qid, qtitle, atext, aresult, ascore, score FROM `useranswer` u, `questions` q, `user` s WHERE u.email = s.email AND u.qid = q.qid AND u.qid='$qid' ORDER BY u.email") or die('Error');
+		echo  '<div class="panel">';
+        echo '<form action="update.php?q=score2" method="POST">';
+		echo '<input name="eid" value="'.$eid.'" type="hidden">';
+		echo '<input name="returnq" value="10" type="hidden">';
+		$row_num = 0;
+		while ($row = mysqli_fetch_array($result)) 
+		{
+			$email = $row['email'];
+			$name = $row['name'];
+			$aresult = $row['aresult'];
+			$ascore = $row['ascore'];
+			$score = $row['score'];
+			$atext = htmlspecialchars($row['atext']);
+			echo '<b>'.$email.' / '.$name.'</b><br />';
+			echo '<pre class="brush:cpp; toolbar:false;">'.$atext.'</pre>';
+			echo '<div class="container-fluid"><div class="row"><div class="col-sm-2">평가 :</div><div class="col-sm-10"><textarea name="aresult_'.$row_num.'" cols="70" rows="3" class="form-control" >'.$aresult.'</textarea></div></div>';
+			echo '<div class="row"><div class="col-sm-2">점수 :</div><div class="col-sm-3"><input name="ascore_'.$row_num.'" value="'.$ascore.'" class="form-control input-md"></div><div class="col-sm-7"> / '.$score.'</div></div></div><br />';
+			echo '<input name="qid_'.$row_num.'" value="'.$qid.'" type="hidden">';
+			echo '<input name="uid_'.$row_num.'" value="'.$email.'" type="hidden">';
+			$row_num++;
+		}
+		echo '<input name="item_count" value="'.$row_num.'" type="hidden"><button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;저장</button>';
+		echo '</form></div>';
+	}
+	// 학생별 문제 목록
+	else if (@$_GET['q'] == 11 && !(@$_GET['step']))
+	{
+		$eid = @$_GET['eid'];
+		$result = mysqli_query($con,"SELECT u.email as email, u.name as name, count(a.qid) cnt, sum(a.ascore) as sscore FROM `user` u, `questions` q, `useranswer` a WHERE u.email = a.email AND q.qid = a.qid AND q.eid = '$eid' GROUP BY a.email ORDER BY u.email") or die('Error');
+		echo  '<div class="panel"><p><b>시 험 명 : '.$_SESSION['config']['exam.title'].'<br />응시시간 : '.$_SESSION['config']['exam.begin'].' ~ '.$_SESSION['config']['exam.end'].'</b></p><table class="table table-striped title1"> <tr><td><b>번호</b></td><td><b>학번</b></td><td><b>이름</b></td><td><b>답안수</b></td><td><b>점수</b></td><td></td></tr>';
+		$c = 1;
+		while($row = mysqli_fetch_array($result)) 
+		{
+			$email = $row['email'];
+			$name = $row['name'];
+			$cnt = $row['cnt'];
+			$sscore = $row['sscore'];
+			echo '<tr><td>'.$c++.'</td><td>'.$email.'</td><td>'.$name.'</td><td>'.$cnt.'</td><td>'.$sscore.'</td><td><b><a href="dash.php?q=11&step=2&eid='.$eid.'&uid='.$email.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>View</b></span></a></b></td></tr>';
+		}
+		echo '</table></div>';
+	}
+	// 학생별 답안 목록
+	else if (@$_GET['q'] == 11 && @$_GET['step'] == 2)
+	{
+		$eid = @$_GET['eid'];
+		$uid = @$_GET['uid'];
+		$n = @$_GET['n'];
+		$result = mysqli_query($con,"SELECT sn, u.qid, qtitle, atext, aresult, ascore, score FROM `useranswer` u, `questions` q WHERE q.eid='$eid' AND u.qid = q.qid AND u.email = '$uid' ORDER BY sn") or die('Error');
+		//$row_count = mysqli_num_rows($result);
+		echo '<div class="panel">';
+        echo '<form action="update.php?q=score" method="POST">';
+		echo '<input name="eid" value="'.$eid.'" type="hidden">';
+		echo '<input name="uid" value="'.$uid.'" type="hidden">';
+		echo '<input name="returnq" value="11" type="hidden">';
+		$row_num = 0;
+		while($row = mysqli_fetch_array($result)) 
+		{
+			$sn = $row['sn'];
+			$qid = $row['qid'];
+			$qtitle = $row['qtitle'];
+			$atext = htmlspecialchars($row['atext']);
+			$aresult = $row['aresult'];
+			$ascore = $row['ascore'];
+			$score = $row['score'];
+			echo '<p><b>'.$sn.' : '.$qtitle.'</b></p><pre class="brush:cpp; toolbar:false;">'.$atext.'</pre><br />';
+			echo '<div class="container-fluid"><div class="row"><div class="col-sm-2">평가 :</div><div class="col-sm-10"><textarea name="aresult_'.$row_num.'" cols="70" rows="3" class="form-control" >'.$aresult.'</textarea></div></div>';
+			echo '<div class="row"><div class="col-sm-2">점수 :</div><div class="col-sm-3"><input name="ascore_'.$row_num.'" value="'.$ascore.'" class="form-control input-md"></div><div class="col-sm-7"> / '.$score.'</div></div></div><br />';
+			echo '<input name="qid_'.$row_num.'" value="'.$qid.'" type="hidden">';
+			$row_num++;
+		}
+		echo '<input name="item_count" value="'.$row_num.'" type="hidden"><button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>&nbsp;저장</button>';
+		echo '</form></div>';
+	}
 	// admin test
-	else if(@$_GET['q'] == 11) 
+	else if(@$_GET['q'] == 99) 
 	{
 ?>
 <div class="panel">

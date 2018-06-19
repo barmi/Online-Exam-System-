@@ -1,6 +1,12 @@
 <?php
  include_once 'head.html';
 ?>
+<link rel="stylesheet" type="text/css" href="/highlight/styles/shCoreDefault.css" />
+<link rel="stylesheet" type="text/css" href="/highlight/styles/shThemeDefault.css" />
+
+<script type="text/javascript" src="/highlight/scripts/shCore.js"></script>
+<script type="text/javascript" src="/highlight/scripts/shAutoloader.js"></script>
+<script type="text/javascript" src="/highlight/scripts.js"></script>
 
  <!--alert message-->
 <?php 
@@ -79,8 +85,8 @@ function validateForm()
       <ul class="nav navbar-nav">
         <li <?php if(@$_GET['q']==1) echo'class="active"'; ?> ><a href="account.php?q=1"><span class="glyphicon glyphicon-home" aria-hidden="true"></span>&nbsp;Home<span class="sr-only">(current)</span></a></li>
         <li <?php if(@$_GET['q']==2) echo'class="active"'; ?>><a href="account.php?q=2"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>&nbsp;Password</a></li>
+		<li <?php if(@$_GET['q']==3) echo'class="active"'; ?>><a href="account.php?q=3"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;점수확인</a></li></ul>
 		<!--
-		<li <?php if(@$_GET['q']==3) echo'class="active"'; ?>><a href="account.php?q=3"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>&nbsp;Ranking</a></li></ul>
             <form class="navbar-form navbar-left" role="search">
         <div class="form-group">
           <input type="text" class="form-control" placeholder="Enter tag ">
@@ -309,28 +315,46 @@ if(@$_GET['q']== 2)
 }
 
 //ranking start
-if(@$_GET['q']== 3) 
+if(@$_GET['q']== 3  && !(@$_GET['step']) )
 {
-$q=mysqli_query($con,"SELECT * FROM rank  ORDER BY score DESC " )or die('Error223');
-echo  '<div class="panel title">
-<table class="table table-striped title1" >
-<tr style="color:red"><td><b>Rank</b></td><td><b>Name</b></td><td><b>Gender</b></td><td><b>College</b></td><td><b>Score</b></td></tr>';
-$c=0;
-while($row=mysqli_fetch_array($q) )
-{
-$e=$row['email'];
-$s=$row['score'];
-$q12=mysqli_query($con,"SELECT * FROM user WHERE email='$e' " )or die('Error231');
-while($row=mysqli_fetch_array($q12) )
-{
-$name=$row['name'];
-$gender=$row['gender'];
-$college=$row['college'];
+	$q=mysqli_query($con,"SELECT e.eid, e.title, count(q.eid) as cnt, ifnull(sum(a.ascore),0) as score FROM quiz e, questions q LEFT OUTER JOIN `useranswer` a ON (q.qid = a.qid and a.email = '$email') WHERE e.eid = q.eid GROUP BY e.eid" )or die('Error223');
+	echo  '<div class="panel title">
+		<table class="table table-striped title1" >
+		<tr style="color:black"><td><b>No.</b></td><td><b>시험명</b></td><td><b>문제수</b></td><td><b>점수</b></td><td><b>&nbsp;</b></td></tr>';
+	$c = 0;
+	while($row=mysqli_fetch_array($q) )
+	{
+		$eid = $row['eid'];
+		$title = $row['title'];
+		$cnt = $row['cnt'];
+		$score = $row['score'];
+		$c++;
+		echo '<tr><td style="color:#99cc32"><b>'.$c.'</b></td><td>'.$title.'</td><td>'.$cnt.'</td><td>'.$score.'</td><td><b><a href="account.php?q=3&step=2&eid='.$eid.'" class="pull-right btn sub1" style="margin:0px;background:#99cc32"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>&nbsp;<span class="title1"><b>보기</b></span></a></b></td><td>';
+	}
+	echo '</table></div>';
+	writeLog('score', "점수확인");
 }
-$c++;
-echo '<tr><td style="color:#99cc32"><b>'.$c.'</b></td><td>'.$name.'</td><td>'.$gender.'</td><td>'.$college.'</td><td>'.$s.'</td><td>';
+else if(@$_GET['q']== 3  && @$_GET['step'] == 2)
+{
+	$eid = $_GET['eid'];
+	$q=mysqli_query($con,"SELECT qtitle, q.score, atext, aresult, ascore FROM quiz e, questions q, `useranswer` a WHERE e.eid = '$eid' AND e.eid = q.eid AND q.qid = a.qid AND a.email = '$email' ORDER BY q.qid" )or die('Error224');
+	echo  '<div class="panel">';
+	while($row=mysqli_fetch_array($q) )
+	{
+		$atext = htmlspecialchars($row['atext']);
+		$qtitle = $row['qtitle'];
+		$score = $row['score'];
+		$aresult = nl2br($row['aresult']);
+		$ascore = $row['ascore'];
+		echo '<b>'.$qtitle.'</b><br />';
+		echo '<pre class="brush:cpp; toolbar:false;">'.$atext.'</pre>';
+		echo '<b>'.$aresult.'</b><br /><br />';
+		echo '<b>점수 : '.$ascore.' / '.$score.'</b><br /><br /><br />';
+		
+	}
+	echo '</div>';
+	writeLog('score', "개별 점수확인-".$eid);
 }
-echo '</table></div>';}
 ?>
 
 
